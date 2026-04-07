@@ -1,0 +1,58 @@
+<main class="page">
+  <header class="topbar">
+    <div class="brand">
+      <div class="titles">
+        <div class="app-name">To-Do List</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="chip">In progress: {{ pendingCount() }}</div>
+    </div>
+  </header>
+
+  <section class="card">
+    <form class="add" (submit)="$event.preventDefault(); add()">
+      <input
+        class="input"
+        placeholder="Add a task…"
+        [value]="newTitle()"
+        (input)="newTitle.set(($any($event.target)).value)"
+      />
+      <button
+        class="add-btn"
+        type="submit"
+        [disabled]="todos.isLoading() || !newTitle().trim()"
+      >
+        <span class="add-btn__icon" aria-hidden="true">+</span>
+      </button>
+    </form>
+
+    @if (todos.error()) {
+      <div class="error">Server error</div>
+    }
+
+    <div class="list">
+        @for (t of items(); track t.id) {
+          <div class="item" [class.done]="t.isDone">
+            <label class="check">
+              <input type="checkbox" [checked]="t.isDone" (change)="toggle(t.id, !t.isDone)" />
+              <span></span>
+            </label>
+
+            <input
+              class="title"
+              [value]="t.title"
+              (keydown.enter)="$event.preventDefault(); ($any($event.target)).blur()"
+              (blur)="rename(t.id, ($any($event.target)).value)"
+            />
+
+            <button class="icon" type="button" title="Delete" (click)="remove(t.id)">✕</button>
+          </div>
+        }
+
+        @if (items().length === 0) {
+          <div class="empty">Nothing to do yet?</div>
+        }
+    </div>
+  </section>
+</main>

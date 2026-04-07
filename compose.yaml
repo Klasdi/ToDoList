@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: todolist
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - todolist_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d todolist"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: backend-api
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      ConnectionStrings__Default: Host=db;Port=5432;Database=todolist;Username=postgres;Password=postgres
+    ports:
+      - "5038:8080"
+
+volumes:
+  todolist_db:
+
